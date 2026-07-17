@@ -1,0 +1,35 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/.env
+    environment:
+      WIFI_DB_PATH: /app/data/ares_wifi.db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/data:/app/data
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: /api
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  valhalla:
+    image: ghcr.io/gis-ops/docker-valhalla/valhalla:latest
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./custom_files:/custom_files
+    environment:
+      - serve_route=True
+      - serve_locate=True
+      - serve_optimized_route=True
+      - serve_isochrone=True
+      - serve_trace_attributes=True

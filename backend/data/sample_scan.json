@@ -1,0 +1,20 @@
+{
+  "location": {
+    "label": "Union Square, San Francisco",
+    "lat": 37.787994,
+    "lon": -122.407437,
+    "radius_m": 1200
+  },
+  "density": {
+    "total_places": 23,
+    "counts": {
+      "restaurant": 11,
+      "transport": 4,
+      "services": 5,
+      "retail": 2,
+      "healthcare": 1
+    },
+    "density_score": 57,
+    "density_label": "dense"
+  }
+}

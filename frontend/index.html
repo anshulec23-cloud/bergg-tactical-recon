@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>ARES</title>
+    <meta name="theme-color" content="#0e0f0e" />
+    <link rel="manifest" href="/manifest.json" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        const swVersion = 'ares-v3';
+        if (localStorage.getItem('ares-sw-version') !== swVersion) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            for (let r of registrations) {
+              r.unregister();
+            }
+            localStorage.setItem('ares-sw-version', swVersion);
+            // Clear cache API storage too
+            if (window.caches) {
+              caches.keys().then(names => {
+                for (let name of names) caches.delete(name);
+              });
+            }
+            setTimeout(() => window.location.reload(), 150);
+          });
+        } else {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').then(reg => {
+              console.log('ServiceWorker registration successful scope: ', reg.scope);
+            });
+          });
+        }
+      }
+    </script>
+  </body>
+</html>
