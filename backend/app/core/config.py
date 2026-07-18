@@ -9,8 +9,6 @@ def _env(name: str, default: str = "") -> str:
 
 @dataclass(frozen=True)
 class Settings:
-    openai_api_key: str = _env("OPENAI_API_KEY")
-    openai_model: str = _env("OPENAI_MODEL", "gpt-4o-mini")
     overpass_url: str = _env("OVERPASS_URL", "https://overpass-api.de/api/interpreter")
     nominatim_url: str = _env("NOMINATIM_URL", "https://nominatim.openstreetmap.org/search")
     valhalla_url: str = _env("VALHALLA_URL", "http://valhalla:8002")

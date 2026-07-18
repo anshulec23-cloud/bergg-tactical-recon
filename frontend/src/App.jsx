@@ -57,7 +57,7 @@ export default function App() {
   const [startPoint, setStartPoint] = useState(null);
   const [stopPoint, setStopPoint] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [statusText, setStatusText] = useState("SYSTEM BOOT // NOMINAL");
+  const [statusText, setStatusText] = useState("System Standby");
   const [error, setError] = useState("");
   const scanTimerRef = useRef(null);
 
@@ -209,28 +209,14 @@ export default function App() {
     setChatMessages(prev => [...prev, { sender: "user", text: userMsg }]);
     setChatLoading(true);
     
-    try {
-      const response = await fetch(`${API_BASE_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: userMsg,
-          context: {
-            lat: location.lat,
-            lon: location.lon,
-            mode: activeRouteMode,
-            has_route: !!activeRouteResult
-          }
-        })
-      });
-      if (!response.ok) throw new Error("Connection failed");
-      const data = await response.json();
-      setChatMessages(prev => [...prev, { sender: "ai", text: data.response }]);
-    } catch (err) {
-      setChatMessages(prev => [...prev, { sender: "ai", text: "ERROR: Communication link timeout." }]);
-    } finally {
+    // Simulate parsing delay for effect, then open web search
+    setTimeout(() => {
       setChatLoading(false);
-    }
+      const locLabel = location.label || `${location.lat},${location.lon}`;
+      const searchUrl = `https://duckduckgo.com/?q=${encodeURIComponent(userMsg)}+near+${encodeURIComponent(locLabel)}&ia=web`;
+      setChatMessages(prev => [...prev, { sender: "ai", text: `Opening secure web search for: "${userMsg}"...` }]);
+      window.open(searchUrl, "_blank", "noopener,noreferrer");
+    }, 600);
   };
 
   const activeRouteResult = routesMap[activeRouteMode];
@@ -264,20 +250,44 @@ export default function App() {
       {/* 2. Floating Header */}
       <header className="hud-overlay hud-header hud-interactive">
         <div className="hud-brand">
-          <div className="hud-logo">ARES RECON</div>
+          <div className="hud-logo">SpyNet Shield</div>
           <div className="hud-status-badge">
             <div className={`status-dot ${isOnline ? "" : "offline"}`} />
-            {isOnline ? "ONLINE // CLOUD SYNC" : "OFFLINE // PWA VECTOR MODE"}
+            {isOnline ? "Online (Cloud)" : "Offline (Local)"}
           </div>
         </div>
-        <div className="hud-status-badge" style={{ color: "var(--neon-emerald)", borderColor: "rgba(0,255,102,0.2)" }}>
-          <div className="status-dot" style={{ background: "var(--neon-emerald)", boxShadow: "0 0 8px var(--neon-emerald)" }} />
-          GHOST AGGREGATOR // 20KM SHIELD ACTIVE
-        </div>
+        
+        {scan?.density?.threat_assessment && (
+          <div className={`hud-status-badge ${scan.density.threat_assessment.level.toLowerCase()}`}>
+            <div className={`status-dot ${scan.density.threat_assessment.level.toLowerCase()}`} />
+            Threat Level: {scan.density.threat_assessment.level}
+          </div>
+        )}
       </header>
 
       {/* 3. Floating Left Panel: Telemetry & Intel */}
       <aside className="hud-overlay hud-left-panel hud-interactive">
+        <div>
+          <h2 className="panel-title">Threat Assessment (SpyNet)</h2>
+          <div className="telemetry-row">
+            <span className="telemetry-label">Local Threat Level</span>
+            <span className={`telemetry-value`} style={{
+              color: scan?.density?.threat_assessment?.level === 'CRITICAL' ? 'var(--accent-red)' :
+                     scan?.density?.threat_assessment?.level === 'ELEVATED' ? 'var(--accent-orange)' : 'var(--accent-green)'
+            }}>
+              {scan?.density?.threat_assessment?.level || "CALCULATING"}
+            </span>
+          </div>
+          <div className="telemetry-row">
+            <span className="telemetry-label">Open Wi-Fi Nodes (Module A)</span>
+            <span className="telemetry-value">{scan?.density?.threat_assessment?.wifi_count || 0}</span>
+          </div>
+          <div className="telemetry-row">
+            <span className="telemetry-label">Surveillance Lenses (Module B)</span>
+            <span className="telemetry-value">{scan?.density?.threat_assessment?.camera_count || 0}</span>
+          </div>
+        </div>
+
         <div>
           <h2 className="panel-title">System Console</h2>
           <div className="telemetry-row">
@@ -338,10 +348,13 @@ export default function App() {
                 <div className="poi-info">
                   <span className="poi-name">{place.name || "Unnamed Point"}</span>
                   <span className="poi-cat" style={{ 
-                    color: place.category === "healthcare" ? "var(--neon-cyan)" : 
-                           place.category === "hotel" ? "var(--neon-gold)" :
-                           place.category === "surveillance" ? "var(--neon-crimson)" : "" 
+                    color: place.category === "healthcare" ? "var(--accent-blue)" : 
+                           place.category === "hotel" ? "var(--accent-orange)" :
+                           place.category === "surveillance" ? "var(--accent-red)" : 
+                           place.category === "wifi" ? "var(--accent-green)" : "" 
                   }}>
+                    {place.category === "wifi" && <span className="threat-icon" style={{background: "var(--accent-green)", marginRight: "4px"}}/>}
+                    {place.category === "surveillance" && <span className="threat-icon" style={{background: "var(--accent-red)", marginRight: "4px"}}/>}
                     {place.category}
                   </span>
                 </div>
@@ -362,9 +375,10 @@ export default function App() {
             <div className="telemetry-row">
               <span className="telemetry-label">Target Name</span>
               <span className="telemetry-value" style={{ 
-                color: selectedPlace.category === "healthcare" ? "var(--neon-cyan)" : 
-                       selectedPlace.category === "hotel" ? "var(--neon-gold)" :
-                       selectedPlace.category === "surveillance" ? "var(--neon-crimson)" : "var(--neon-cyan)" 
+                color: selectedPlace.category === "healthcare" ? "var(--accent-blue)" : 
+                       selectedPlace.category === "hotel" ? "var(--accent-orange)" :
+                       selectedPlace.category === "surveillance" ? "var(--accent-red)" :
+                       selectedPlace.category === "wifi" ? "var(--accent-green)" : "var(--accent-blue)" 
               }}>{selectedPlace.name || "N/A"}</span>
             </div>
             <div className="telemetry-row">
@@ -386,8 +400,8 @@ export default function App() {
       {/* 4. Bottom HUD Control Deck */}
       <footer className="hud-overlay hud-bottom-deck hud-interactive">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontSize: "11px", fontFamily: "Share Tech Mono, monospace", color: "var(--text-muted)" }}>
-            NAV LOGGER // <span style={{ color: "var(--neon-cyan)" }}>{statusText}</span>
+          <div style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
+            System Status: <span style={{ color: "var(--text-primary)" }}>{statusText}</span>
           </div>
           {(startPoint || stopPoint) && (
             <button className="btn-hud btn-hud-danger" style={{ padding: "4px 10px", fontSize: "10px", width: "auto" }} onClick={() => { setStartPoint(null); setStopPoint(null); setRoutesMap({ driving: null, walking: null, cycling: null }); setNavigationActive(false); }}>
@@ -482,16 +496,16 @@ export default function App() {
       {/* 5. Floating Right Panel: Turn-by-Turn Guidance */}
       {navigationActive && selectedPathDetails && (
         <aside className="hud-overlay hud-right-panel hud-interactive">
-          <h2 className="panel-title" style={{ color: "var(--neon-emerald)", borderBottomColor: "var(--neon-emerald)" }}>
+          <h2 className="panel-title" style={{ color: "var(--accent-green)", borderBottomColor: "var(--accent-green)" }}>
             Nav Routing Guidance
-            <button className="btn-hud" style={{ padding: "2px 8px", fontSize: "10px", width: "auto" }} onClick={() => setNavigationActive(false)}>
+            <button className="btn-hud" style={{ padding: "4px 8px", fontSize: "11px", width: "auto" }} onClick={() => setNavigationActive(false)}>
               Close Panel
             </button>
           </h2>
           <div className="telemetry-row">
             <span className="telemetry-label">Route Choice</span>
-            <span className="telemetry-value" style={{ color: routePreference === "shortest_route" ? "var(--neon-cyan)" : "var(--neon-crimson)" }}>
-              {routePreference === "shortest_route" ? "SHORTEST PATH (BLUE)" : "MAIN ROAD PATH (RED)"}
+            <span className="telemetry-value" style={{ color: routePreference === "shortest_route" ? "var(--accent-blue)" : "var(--accent-red)" }}>
+              {routePreference === "shortest_route" ? "SHORTEST PATH" : "MAIN ROAD PATH"}
             </span>
           </div>
           <div className="telemetry-row" style={{ marginBottom: "12px" }}>

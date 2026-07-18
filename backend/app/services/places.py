@@ -10,6 +10,12 @@ from app.utils.geo import haversine_km
 
 
 CATEGORY_MAP = {
+    "internet_access": {
+        "wlan": "wifi",
+        "yes": "wifi",
+        "terminal": "wifi",
+        "service": "wifi"
+    },
     "amenity": {
         "restaurant": "restaurant",
         "cafe": "restaurant",
@@ -82,6 +88,26 @@ def geocode_place(place_name: str) -> tuple[float, float, str]:
     return float(item["lat"]), float(item["lon"]), item.get("display_name", place_name)
 
 
+def reverse_geocode(lat: float, lon: float) -> str:
+    params = {"lat": lat, "lon": lon, "format": "jsonv2"}
+    headers = {"User-Agent": "ARES/1.0"}
+    try:
+        response = requests.get(
+            settings.nominatim_url.replace("search", "reverse"),
+            params=params, headers=headers, timeout=5
+        )
+        data = response.json()
+        if data and "display_name" in data:
+            # Extract city or town if possible, otherwise use full name
+            addr = data.get("address", {})
+            city = addr.get("city") or addr.get("town") or addr.get("village") or addr.get("suburb")
+            if city:
+                return f"{city}, {addr.get('country', '')}".strip(", ")
+            return data["display_name"]
+    except Exception:
+        pass
+    return f"{lat},{lon}"
+
 def _category_from_tags(tags: dict[str, Any]) -> tuple[str, str | None]:
     for key, mapping in CATEGORY_MAP.items():
         value = tags.get(key)
@@ -123,17 +149,14 @@ def fetch_places(lat: float, lon: float, radius_m: int) -> list[PlaceResult]:
     if cached is not None:
         return [PlaceResult(**item) for item in cached]
 
-    # CLOAKING MECHANISM: We ask the server for everything in a 20km radius 
-    # (or up to 20,000m) rather than the precise requested radius (e.g. 500m), 
-    # so the API provider doesn't know exactly where we are within that 20km zone.
-    cloak_radius_m = max(radius_m, 20000)
-
+    # CLOAKING MECHANISM: Removed as it causes timeout issues with large radii.
+    
     query = f"""
     [out:json][timeout:25];
     (
-      node(around:{cloak_radius_m},{lat},{lon});
-      way(around:{cloak_radius_m},{lat},{lon});
-      relation(around:{cloak_radius_m},{lat},{lon});
+      node(around:{radius_m},{lat},{lon});
+      way(around:{radius_m},{lat},{lon});
+      relation(around:{radius_m},{lat},{lon});
     );
     out center tags;
     """
@@ -184,6 +207,13 @@ def fetch_places(lat: float, lon: float, radius_m: int) -> list[PlaceResult]:
         )
 
     results.sort(key=lambda item: item.distance_m)
+    
+    # Priority sorting: always keep critical nodes, then fill the rest with closest nodes
+    priority_categories = {"wifi", "surveillance", "hotel", "healthcare"}
+    priority_nodes = [r for r in results if r.category in priority_categories]
+    other_nodes = [r for r in results if r.category not in priority_categories]
+    
+    results = priority_nodes + other_nodes
     results = results[:80]
     
     # Save to cache
@@ -191,10 +221,28 @@ def fetch_places(lat: float, lon: float, radius_m: int) -> list[PlaceResult]:
     return results
 
 
+from app.utils.geo import haversine_km
+
 def summarize_places(places: list[PlaceResult]) -> dict[str, Any]:
     counts: dict[str, int] = {}
     for place in places:
         counts[place.category] = counts.get(place.category, 0) + 1
+        
+    wifi_nodes = [p for p in places if p.category == "wifi"]
+    surveillance_nodes = [p for p in places if p.category == "surveillance"]
+    
+    threat_level = "SAFE"
+    if wifi_nodes and surveillance_nodes:
+        critical = False
+        for w in wifi_nodes:
+            for s in surveillance_nodes:
+                if haversine_km(w.lat, w.lon, s.lat, s.lon) < 0.1: # within 100m
+                    critical = True
+                    break
+        threat_level = "CRITICAL" if critical else "ELEVATED"
+    elif wifi_nodes or surveillance_nodes:
+        threat_level = "ELEVATED"
+        
     total = len(places)
     density_score = min(100, int((total / 40) * 100))
     if total >= 40:
@@ -205,4 +253,15 @@ def summarize_places(places: list[PlaceResult]) -> dict[str, Any]:
         density_label = "moderate"
     else:
         density_label = "sparse"
-    return {"total_places": total, "counts": counts, "density_score": density_score, "density_label": density_label}
+        
+    return {
+        "total_places": total, 
+        "counts": counts, 
+        "density_score": density_score, 
+        "density_label": density_label,
+        "threat_assessment": {
+            "level": threat_level,
+            "wifi_count": len(wifi_nodes),
+            "camera_count": len(surveillance_nodes)
+        }
+    }
