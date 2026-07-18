@@ -1,25 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
   color-scheme: dark;
-  --bg-primary: #05080c;
-  --panel-bg: rgba(10, 16, 26, 0.75);
-  --panel-border: rgba(0, 229, 255, 0.15);
-  --panel-border-hover: rgba(0, 229, 255, 0.4);
-  --glow-cyan: 0 0 15px rgba(0, 229, 255, 0.3);
-  --glow-red: 0 0 15px rgba(255, 0, 85, 0.4);
-  --text-primary: #e2f1f5;
-  --text-muted: #8fa7b2;
-  --neon-cyan: #00e5ff;
-  --neon-gold: #ffcc00;
-  --neon-crimson: #ff0055;
-  --neon-emerald: #00ff66;
-  --blur-amount: 14px;
+  --bg-primary: #050505;
+  --panel-bg: rgba(18, 18, 18, 0.7);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --panel-border-hover: rgba(255, 255, 255, 0.15);
+  --text-primary: #f5f5f5;
+  --text-muted: #888888;
+  --accent-cyan: #33aaff;
+  --accent-gold: #ffaa33;
+  --accent-crimson: #ff3344;
+  --accent-emerald: #33ff88;
+  --blur-amount: 24px;
 }
 
 * {
   box-sizing: border-box;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html, body, #root {
@@ -29,7 +27,7 @@ html, body, #root {
   height: 100%;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   overflow: hidden;
 }
 
@@ -63,98 +61,54 @@ html, body, #root {
   overflow: hidden;
 }
 
-.map-shell.map-armed::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border: 2px dashed var(--neon-cyan);
-  pointer-events: none;
-  z-index: 4;
-}
-
-/* Crosshair overlay in center of map */
-.crosshair {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 32px;
-  height: 32px;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.crosshair::before,
-.crosshair::after {
-  content: '';
-  position: absolute;
-  background: var(--neon-cyan);
-  opacity: 0.5;
-}
-
-.crosshair::before {
-  top: 15px;
-  left: 0;
-  width: 32px;
-  height: 2px;
-}
-
-.crosshair::after {
-  top: 0;
-  left: 15px;
-  width: 2px;
-  height: 32px;
-}
-
 /* Map Hint strip */
 .map-hint {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(5, 8, 12, 0.85);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(0, 229, 255, 0.15);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--text-muted);
   text-transform: uppercase;
   z-index: 6;
   pointer-events: none;
 }
 
-/* Floating Glassmorphic HUD Overlays */
+/* Floating Glassmorphic Overlays */
 .hud-overlay {
   position: absolute;
   z-index: 10;
-  pointer-events: none; /* Let clicks pass through default spaces */
+  pointer-events: none; 
   display: flex;
   flex-direction: column;
 }
 
 .hud-interactive {
-  pointer-events: auto; /* Re-enable for controls */
+  pointer-events: auto;
   background: var(--panel-bg);
   backdrop-filter: blur(var(--blur-amount));
   -webkit-backdrop-filter: blur(var(--blur-amount));
   border: 1px solid var(--panel-border);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 229, 255, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
 .hud-interactive:hover {
   border-color: var(--panel-border-hover);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), 0 0 10px rgba(0, 229, 255, 0.1);
 }
 
 /* Header UI */
 .hud-header {
-  top: 16px;
-  left: 16px;
-  right: 16px;
-  height: 64px;
-  padding: 0 20px;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  height: 60px;
+  padding: 0 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -163,16 +117,15 @@ html, body, #root {
 .hud-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .hud-logo {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: 3px;
-  color: var(--neon-cyan);
-  text-shadow: var(--glow-cyan);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--text-primary);
+  text-transform: uppercase;
 }
 
 .hud-status-badge {
@@ -180,48 +133,46 @@ html, body, #root {
   align-items: center;
   gap: 8px;
   font-size: 11px;
-  font-family: 'Share Tech Mono', monospace;
-  padding: 4px 10px;
+  font-weight: 500;
+  padding: 6px 12px;
   border-radius: 20px;
-  background: rgba(0, 229, 255, 0.1);
-  border: 1px solid rgba(0, 229, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .status-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--neon-cyan);
-  box-shadow: var(--glow-cyan);
+  background: var(--text-primary);
 }
 
 .status-dot.offline {
-  background: var(--neon-gold);
-  box-shadow: 0 0 8px var(--neon-gold);
+  background: var(--accent-gold);
 }
 
 /* Left Sidebar - Telemetry & Analysis */
 .hud-left-panel {
-  top: 96px;
-  left: 16px;
-  bottom: 16px;
+  top: 100px;
+  left: 20px;
+  bottom: 20px;
   width: 380px;
-  padding: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
 .panel-title {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 14px;
-  letter-spacing: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: var(--neon-cyan);
-  border-bottom: 1px solid rgba(0, 229, 255, 0.2);
-  padding-bottom: 8px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 12px;
   margin-top: 0;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -229,15 +180,15 @@ html, body, #root {
 
 /* Bottom Control Deck */
 .hud-bottom-deck {
-  bottom: 24px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
   max-width: 650px;
-  padding: 16px 24px;
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 /* Routing Buttons Group */
@@ -249,13 +200,13 @@ html, body, #root {
 
 .btn-hud {
   flex: 1;
-  background: rgba(10, 25, 41, 0.8);
-  border: 1px solid rgba(0, 229, 255, 0.3);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
   padding: 14px 18px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 14px;
-  font-weight: 600;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text-primary);
   cursor: pointer;
   display: flex;
@@ -263,87 +214,82 @@ html, body, #root {
   justify-content: center;
   gap: 8px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .btn-hud:hover:not(:disabled) {
-  background: var(--neon-cyan);
-  color: #05080c;
-  border-color: var(--neon-cyan);
-  box-shadow: var(--glow-cyan);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .btn-hud.active {
-  border-color: var(--neon-cyan);
-  box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.2), var(--glow-cyan);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .btn-hud:disabled {
-  opacity: 0.3;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .btn-hud-danger {
-  border-color: rgba(255, 0, 85, 0.4);
+  border-color: rgba(255, 51, 68, 0.3);
 }
 
 .btn-hud-danger:hover:not(:disabled) {
-  background: var(--neon-crimson);
-  color: #fff;
-  border-color: var(--neon-crimson);
-  box-shadow: var(--glow-red);
+  background: rgba(255, 51, 68, 0.1);
+  border-color: rgba(255, 51, 68, 0.6);
 }
 
-/* Mode Compare Grid (Calculates all 3 modes automatically) */
+/* Mode Compare Grid */
 .mode-compare-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
 
 .compare-card {
-  background: rgba(5, 8, 12, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 12px;
   text-align: center;
 }
 
 .compare-card.active {
-  border-color: var(--neon-cyan);
-  box-shadow: inset 0 0 8px rgba(0, 229, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .compare-card .mode-icon {
   font-size: 16px;
   color: var(--text-muted);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .compare-card.active .mode-icon {
-  color: var(--neon-cyan);
+  color: var(--text-primary);
 }
 
 .compare-card .mode-title {
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--text-muted);
 }
 
 .compare-card .mode-val {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 15px;
-  font-weight: 600;
-  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 6px;
 }
 
 /* Floating Intel Boxes */
 .intel-scroll {
   flex: 1;
   overflow-y: auto;
-  padding-right: 4px;
+  padding-right: 8px;
 }
 
 .intel-scroll::-webkit-scrollbar {
@@ -351,15 +297,15 @@ html, body, #root {
 }
 
 .intel-scroll::-webkit-scrollbar-thumb {
-  background: rgba(0, 229, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
 }
 
 .telemetry-row {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   font-size: 13px;
 }
 
@@ -368,8 +314,8 @@ html, body, #root {
 }
 
 .telemetry-value {
-  font-family: 'Share Tech Mono', monospace;
-  color: var(--neon-cyan);
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 /* POI List rows in Sidebar */
@@ -377,151 +323,121 @@ html, body, #root {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
+  padding: 12px;
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
-  margin-bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  margin-bottom: 10px;
   cursor: pointer;
 }
 
 .poi-row:hover {
-  background: rgba(0, 229, 255, 0.05);
-  border-color: rgba(0, 229, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .poi-info {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
 .poi-name {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .poi-cat {
   font-size: 10px;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
   color: var(--text-muted);
 }
 
 .poi-distance {
-  font-family: 'Share Tech Mono', monospace;
   font-size: 12px;
-  color: var(--neon-gold);
+  font-weight: 500;
+  color: var(--text-muted);
 }
-
-
 
 /* Alerts and Toast notifications */
 .hud-toast {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: rgba(5, 8, 12, 0.9);
-  border: 1px solid var(--neon-cyan);
-  box-shadow: var(--glow-cyan);
-  border-radius: 8px;
-  padding: 12px 20px;
-  font-family: 'Share Tech Mono', monospace;
+  bottom: 30px;
+  right: 30px;
+  background: rgba(18, 18, 18, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 14px 24px;
   font-size: 13px;
+  font-weight: 500;
   z-index: 100;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
 }
 
 .hud-toast.error {
-  border-color: var(--neon-crimson);
-  box-shadow: var(--glow-red);
-  color: #ff99bb;
+  border-color: rgba(255, 51, 68, 0.4);
+  color: #ffb3b8;
 }
 
 /* Right Sidebar - Navigation Guidance */
 .hud-right-panel {
-  top: 96px;
-  right: 16px;
-  bottom: 16px;
+  top: 100px;
+  right: 20px;
+  bottom: 20px;
   width: 380px;
-  padding: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-  .hud-left-panel {
-    top: 96px;
-    left: 12px;
-    right: 12px;
-    bottom: auto;
-    width: auto;
-    height: 240px;
-  }
-  
-  .hud-right-panel {
-    top: 346px; /* stack below left panel on small screen */
-    left: 12px;
-    right: 12px;
-    bottom: auto;
-    width: auto;
-    height: 200px;
-    z-index: 11;
-  }
-  
-  .hud-bottom-deck {
-    bottom: 12px;
-    width: 94%;
-    padding: 12px;
-  }
-}
-
 /* Floating AI Chat Widget */
 .hud-chat-wrapper {
   position: fixed;
-  bottom: 120px;
-  right: 24px;
+  bottom: 140px;
+  right: 30px;
   z-index: 100;
 }
 
 .hud-chat-trigger {
-  width: 56px;
-  height: 56px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background: rgba(14, 15, 14, 0.85);
-  border: 1px solid var(--neon-cyan);
-  box-shadow: var(--glow-cyan);
-  color: #fff;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 13px;
+  background: rgba(18, 18, 18, 0.85);
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  color: var(--text-primary);
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(10px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hud-chat-trigger:hover {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 0 15px var(--neon-cyan);
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .hud-chat-window {
   position: absolute;
   bottom: 70px;
   right: 0;
-  width: 320px;
-  height: 400px;
-  background: rgba(14, 15, 14, 0.9);
-  border: 1px solid var(--neon-cyan);
-  box-shadow: var(--glow-cyan);
-  border-radius: 12px;
+  width: 340px;
+  height: 440px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  backdrop-filter: blur(15px);
-  animation: slideInUp 0.25s ease-out;
+  backdrop-filter: blur(24px);
+  animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes slideInUp {
@@ -530,13 +446,15 @@ html, body, #root {
 }
 
 .chat-header {
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--panel-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: 'Share Tech Mono', monospace;
   font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -549,39 +467,37 @@ html, body, #root {
 }
 
 .chat-close:hover {
-  color: var(--neon-crimson);
+  color: var(--text-primary);
 }
 
 .chat-messages {
   flex: 1;
-  padding: 12px;
+  padding: 16px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .chat-bubble {
-  max-width: 80%;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 12px;
-  line-height: 1.4;
-  font-family: 'Inter', sans-serif;
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .chat-bubble.ai {
   align-self: flex-start;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom-left-radius: 4px;
 }
 
 .chat-bubble.user {
   align-self: flex-end;
-  background: rgba(0, 229, 255, 0.1);
-  border: 1px solid rgba(0, 229, 255, 0.3);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+  border-bottom-right-radius: 4px;
 }
 
 .chat-bubble.loading .dot {
@@ -591,47 +507,69 @@ html, body, #root {
 .chat-bubble.loading .dot:nth-child(2) { animation-delay: 0.2s; }
 .chat-bubble.loading .dot:nth-child(3) { animation-delay: 0.4s; }
 
-@keyframes pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
-}
-
 .chat-input-form {
   display: flex;
-  padding: 8px;
-  border-top: 1px solid rgba(0, 229, 255, 0.15);
+  padding: 12px;
+  border-top: 1px solid var(--panel-border);
   background: rgba(0, 0, 0, 0.2);
 }
 
 .chat-input-form input {
   flex: 1;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
-  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px 14px;
   color: #fff;
-  font-size: 12px;
-  text-transform: none;
+  font-size: 13px;
+  font-family: inherit;
 }
 
 .chat-input-form input:focus {
   outline: none;
-  border-color: var(--neon-cyan);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .chat-input-form button {
-  background: var(--neon-cyan);
-  color: #05080c;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
-  margin-left: 6px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  font-weight: bold;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
 }
 
 .chat-input-form button:hover {
-  background: #00b8cc;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .hud-left-panel {
+    top: 90px;
+    left: 12px;
+    right: 12px;
+    bottom: auto;
+    width: auto;
+    height: 300px;
+  }
+  
+  .hud-right-panel {
+    top: 410px;
+    left: 12px;
+    right: 12px;
+    bottom: auto;
+    width: auto;
+    height: 240px;
+    z-index: 11;
+  }
+  
+  .hud-bottom-deck {
+    bottom: 12px;
+    width: 94%;
+    padding: 16px;
+  }
 }

@@ -334,6 +334,11 @@ export default function MapPanel({
     <div className={`map-shell ${routeSelectionMode ? "map-armed" : ""}`}>
       <div ref={containerRef} className="map-container" />
       <div className="crosshair" aria-hidden="true" />
+      <div className="map-legend" style={{ position: 'absolute', bottom: '40px', right: '10px', background: 'rgba(5, 8, 12, 0.8)', border: '1px solid var(--border-color)', padding: '8px', fontSize: '10px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '4px', zIndex: 10, pointerEvents: 'none' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#00ff66' }}></span> Wi-Fi Node</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#ff003c' }}></span> CCTV Camera</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#ffcc00' }}></span> Selected Target</div>
+      </div>
       <div className="map-hint">move map to rescan | click marker to inspect | {routeSelectionMode ? `click map to set ${routeSelectionMode}` : "arm start/stop for routing"}</div>
     </div>
   );

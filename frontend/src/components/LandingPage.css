@@ -1,0 +1,170 @@
+.bergg-landing {
+  position: fixed;
+  inset: 0;
+  background: #030303;
+  color: #fff;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.bergg-landing.exiting {
+  opacity: 0;
+  transform: scale(1.05);
+  pointer-events: none;
+}
+
+.bergg-landing-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: background 0.1s ease-out;
+}
+
+/* Subtle particle effects in the background */
+.bergg-landing-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  background: rgba(51, 170, 255, 0.4);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(51, 170, 255, 0.2);
+  animation: float 20s infinite linear;
+}
+
+.particle:nth-child(1) { width: 4px; height: 4px; top: 20%; left: 10%; animation-duration: 25s; }
+.particle:nth-child(2) { width: 6px; height: 6px; top: 70%; left: 80%; animation-duration: 18s; animation-delay: -5s; }
+.particle:nth-child(3) { width: 3px; height: 3px; top: 40%; left: 60%; animation-duration: 22s; animation-delay: -12s; }
+.particle:nth-child(4) { width: 5px; height: 5px; top: 80%; left: 30%; animation-duration: 29s; animation-delay: -2s; }
+
+@keyframes float {
+  0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100vh) translateX(50px) scale(0.5); opacity: 0; }
+}
+
+.bergg-landing-content {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.bergg-landing-title {
+  display: flex;
+  font-size: 6rem;
+  font-weight: 200;
+  letter-spacing: 1rem;
+  margin: 0;
+  margin-right: -1rem; 
+  color: #fff;
+  text-transform: uppercase;
+  perspective: 1000px;
+}
+
+.title-letter {
+  display: inline-block;
+  animation: letterFlipIn 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  transform-origin: bottom center;
+}
+
+.title-letter:nth-child(1) { animation-delay: 0.1s; }
+.title-letter:nth-child(2) { animation-delay: 0.2s; }
+.title-letter:nth-child(3) { animation-delay: 0.3s; }
+.title-letter:nth-child(4) { animation-delay: 0.4s; }
+.title-letter:nth-child(5) { animation-delay: 0.5s; color: var(--accent-cyan, #33aaff); }
+
+@keyframes letterFlipIn {
+  0% { transform: rotateX(-90deg) translateY(40px); opacity: 0; filter: blur(10px); }
+  100% { transform: rotateX(0) translateY(0); opacity: 1; filter: blur(0); }
+}
+
+.bergg-landing-divider {
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: expandWidth 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+  margin: 1rem 0;
+}
+
+@keyframes expandWidth {
+  0% { width: 0; opacity: 0; }
+  100% { width: 150px; opacity: 1; }
+}
+
+.bergg-landing-user {
+  font-size: 1.2rem;
+  font-weight: 300;
+  letter-spacing: 0.15rem;
+  margin: 0;
+  color: #e0e0e0;
+  animation: fadeUp 1.5s cubic-bezier(0.16, 1, 0.3, 1) 1s forwards;
+  opacity: 0;
+}
+
+.bergg-landing-subtitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.3rem;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  animation: fadeUp 1.5s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
+  opacity: 0;
+}
+
+.bergg-enter-btn {
+  margin-top: 3rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  padding: 12px 32px;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  animation: fadeUp 1.5s cubic-bezier(0.16, 1, 0.3, 1) 1.5s forwards;
+  opacity: 0;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.bergg-enter-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(51, 170, 255, 0.5);
+  box-shadow: 0 0 20px rgba(51, 170, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.bergg-enter-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.bergg-enter-btn:hover svg {
+  transform: translateX(4px);
+}
+
+@keyframes fadeUp {
+  0% { transform: translateY(20px); opacity: 0; filter: blur(4px); }
+  100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+}

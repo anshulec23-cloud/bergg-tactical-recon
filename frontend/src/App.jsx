@@ -1,7 +1,8 @@
-import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { API_BASE_URL, routeBetween, scanLocation } from "./lib/api.js";
 
 const MapPanel = lazy(() => import("./components/MapPanel.jsx"));
+import LandingPage from "./components/LandingPage.jsx";
 
 const DEFAULT_LOCATION = { lat: 43.7384, lon: 7.4246, label: "Monaco Sector" };
 
@@ -24,6 +25,7 @@ function coordLabel(point) {
 }
 
 export default function App() {
+  const [showLanding, setShowLanding] = useState(true);
   const [location, setLocation] = useState(DEFAULT_LOCATION);
   const [scan, setScan] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
@@ -57,7 +59,7 @@ export default function App() {
   const [startPoint, setStartPoint] = useState(null);
   const [stopPoint, setStopPoint] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [statusText, setStatusText] = useState("SYSTEM BOOT // NOMINAL");
+  const [statusText, setStatusText] = useState("System Standby");
   const [error, setError] = useState("");
   const scanTimerRef = useRef(null);
 
@@ -172,33 +174,39 @@ export default function App() {
     }
   }, [routeSelectionMode]);
 
+  const activeRouteResult = routesMap[activeRouteMode];
+
   // Filter local places based on user intent keywords
   const filteredPlaces = useMemo(() => {
-    if (!scan?.places) return [];
-    if (!searchIntent) return scan.places;
+    let basePlaces = scan?.places || [];
+    if (activeRouteResult && activeRouteResult.places) {
+      basePlaces = [...basePlaces, ...activeRouteResult.places];
+    }
+    if (!basePlaces.length) return [];
+    if (!searchIntent) return basePlaces;
     const query = searchIntent.toLowerCase();
 
     // Mapping semantic intent to category values
     let targetCat = "";
-    if (["picnic", "park", "nature", "history", "reserve", "monument"].some(kw => query.includes(kw))) {
+    if (["picnic", "park", "nature", "history", "reserve", "monument"].some((kw) => query.includes(kw))) {
       targetCat = "reserve";
-    } else if (["hospital", "clinic", "emergency", "doctor", "medicine"].some(kw => query.includes(kw))) {
+    } else if (["hospital", "clinic", "emergency", "doctor", "medicine"].some((kw) => query.includes(kw))) {
       targetCat = "healthcare";
-    } else if (["hotel", "motel", "hostel", "stay", "vacation"].some(kw => query.includes(kw))) {
+    } else if (["hotel", "motel", "hostel", "stay", "vacation"].some((kw) => query.includes(kw))) {
       targetCat = "hotel";
-    } else if (["gas", "petrol", "fuel", "car"].some(kw => query.includes(kw))) {
+    } else if (["gas", "petrol", "fuel", "car"].some((kw) => query.includes(kw))) {
       targetCat = "fuel";
-    } else if (["store", "convenience", "24/7", "shop"].some(kw => query.includes(kw))) {
+    } else if (["store", "convenience", "24/7", "shop"].some((kw) => query.includes(kw))) {
       targetCat = "convenience";
     }
 
-    return scan.places.filter(place => {
+    return basePlaces.filter(place => {
       if (targetCat && place.category === targetCat) return true;
       return place.name?.toLowerCase().includes(query) || 
              place.category?.toLowerCase().includes(query) || 
              place.subcategory?.toLowerCase().includes(query);
     });
-  }, [scan?.places, searchIntent]);
+  }, [scan?.places, searchIntent, activeRouteResult]);
 
   const handleSendChatMessage = async (e) => {
     e.preventDefault();
@@ -209,38 +217,26 @@ export default function App() {
     setChatMessages(prev => [...prev, { sender: "user", text: userMsg }]);
     setChatLoading(true);
     
-    try {
-      const response = await fetch(`${API_BASE_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: userMsg,
-          context: {
-            lat: location.lat,
-            lon: location.lon,
-            mode: activeRouteMode,
-            has_route: !!activeRouteResult
-          }
-        })
-      });
-      if (!response.ok) throw new Error("Connection failed");
-      const data = await response.json();
-      setChatMessages(prev => [...prev, { sender: "ai", text: data.response }]);
-    } catch (err) {
-      setChatMessages(prev => [...prev, { sender: "ai", text: "ERROR: Communication link timeout." }]);
-    } finally {
+    // Simulate parsing delay for effect, then open web search
+    setTimeout(() => {
       setChatLoading(false);
-    }
+      const locLabel = location.label || `${location.lat},${location.lon}`;
+      const searchUrl = `https://duckduckgo.com/?q=${encodeURIComponent(userMsg)}+near+${encodeURIComponent(locLabel)}&ia=web`;
+      setChatMessages(prev => [...prev, { sender: "ai", text: `Opening secure web search for: "${userMsg}"...` }]);
+      window.open(searchUrl, "_blank", "noopener,noreferrer");
+    }, 600);
   };
 
-  const activeRouteResult = routesMap[activeRouteMode];
+  
   // Determine which specific path option is selected (shortest vs main)
   const selectedPathDetails = activeRouteResult ? activeRouteResult[routePreference] : null;
 
   return (
-    <div className="hud-container">
-      {/* 1. Fullscreen background map */}
-      <div className="map-viewport">
+    <>
+      {showLanding && <LandingPage onEnter={() => setShowLanding(false)} />}
+      <div className="hud-container" style={{ opacity: showLanding ? 0 : 1, pointerEvents: showLanding ? 'none' : 'auto', transition: 'opacity 1s ease-in-out' }}>
+        {/* 1. Fullscreen background map */}
+        <div className="map-viewport">
         <Suspense fallback={<div className="map-container-full" style={{ background: "#05080c" }} />}>
           <MapPanel
             location={location}
@@ -264,20 +260,44 @@ export default function App() {
       {/* 2. Floating Header */}
       <header className="hud-overlay hud-header hud-interactive">
         <div className="hud-brand">
-          <div className="hud-logo">ARES RECON</div>
+          <div className="hud-logo">SpyNet Shield</div>
           <div className="hud-status-badge">
             <div className={`status-dot ${isOnline ? "" : "offline"}`} />
-            {isOnline ? "ONLINE // CLOUD SYNC" : "OFFLINE // PWA VECTOR MODE"}
+            {isOnline ? "Online (Cloud)" : "Offline (Local)"}
           </div>
         </div>
-        <div className="hud-status-badge" style={{ color: "var(--neon-emerald)", borderColor: "rgba(0,255,102,0.2)" }}>
-          <div className="status-dot" style={{ background: "var(--neon-emerald)", boxShadow: "0 0 8px var(--neon-emerald)" }} />
-          GHOST AGGREGATOR // 20KM SHIELD ACTIVE
-        </div>
+        
+        {scan?.density?.threat_assessment && (
+          <div className={`hud-status-badge ${scan.density.threat_assessment.level.toLowerCase()}`}>
+            <div className={`status-dot ${scan.density.threat_assessment.level.toLowerCase()}`} />
+            Threat Level: {scan.density.threat_assessment.level}
+          </div>
+        )}
       </header>
 
       {/* 3. Floating Left Panel: Telemetry & Intel */}
       <aside className="hud-overlay hud-left-panel hud-interactive">
+        <div>
+          <h2 className="panel-title">Threat Assessment (SpyNet)</h2>
+          <div className="telemetry-row">
+            <span className="telemetry-label">Local Threat Level</span>
+            <span className={`telemetry-value`} style={{
+              color: scan?.density?.threat_assessment?.level === 'CRITICAL' ? 'var(--accent-red)' :
+                     scan?.density?.threat_assessment?.level === 'ELEVATED' ? 'var(--accent-orange)' : 'var(--accent-green)'
+            }}>
+              {scan?.density?.threat_assessment?.level || "CALCULATING"}
+            </span>
+          </div>
+          <div className="telemetry-row">
+            <span className="telemetry-label">Open Wi-Fi Nodes (Module A)</span>
+            <span className="telemetry-value">{scan?.density?.threat_assessment?.wifi_count || 0}</span>
+          </div>
+          <div className="telemetry-row">
+            <span className="telemetry-label">Surveillance Lenses (Module B)</span>
+            <span className="telemetry-value">{scan?.density?.threat_assessment?.camera_count || 0}</span>
+          </div>
+        </div>
+
         <div>
           <h2 className="panel-title">System Console</h2>
           <div className="telemetry-row">
@@ -338,10 +358,13 @@ export default function App() {
                 <div className="poi-info">
                   <span className="poi-name">{place.name || "Unnamed Point"}</span>
                   <span className="poi-cat" style={{ 
-                    color: place.category === "healthcare" ? "var(--neon-cyan)" : 
-                           place.category === "hotel" ? "var(--neon-gold)" :
-                           place.category === "surveillance" ? "var(--neon-crimson)" : "" 
+                    color: place.category === "healthcare" ? "var(--accent-blue)" : 
+                           place.category === "hotel" ? "var(--accent-orange)" :
+                           place.category === "surveillance" ? "var(--accent-red)" : 
+                           place.category === "wifi" ? "var(--accent-green)" : "" 
                   }}>
+                    {place.category === "wifi" && <span className="threat-icon" style={{background: "var(--accent-green)", marginRight: "4px"}}/>}
+                    {place.category === "surveillance" && <span className="threat-icon" style={{background: "var(--accent-red)", marginRight: "4px"}}/>}
                     {place.category}
                   </span>
                 </div>
@@ -362,9 +385,10 @@ export default function App() {
             <div className="telemetry-row">
               <span className="telemetry-label">Target Name</span>
               <span className="telemetry-value" style={{ 
-                color: selectedPlace.category === "healthcare" ? "var(--neon-cyan)" : 
-                       selectedPlace.category === "hotel" ? "var(--neon-gold)" :
-                       selectedPlace.category === "surveillance" ? "var(--neon-crimson)" : "var(--neon-cyan)" 
+                color: selectedPlace.category === "healthcare" ? "var(--accent-blue)" : 
+                       selectedPlace.category === "hotel" ? "var(--accent-orange)" :
+                       selectedPlace.category === "surveillance" ? "var(--accent-red)" :
+                       selectedPlace.category === "wifi" ? "var(--accent-green)" : "var(--accent-blue)" 
               }}>{selectedPlace.name || "N/A"}</span>
             </div>
             <div className="telemetry-row">
@@ -386,8 +410,8 @@ export default function App() {
       {/* 4. Bottom HUD Control Deck */}
       <footer className="hud-overlay hud-bottom-deck hud-interactive">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontSize: "11px", fontFamily: "Share Tech Mono, monospace", color: "var(--text-muted)" }}>
-            NAV LOGGER // <span style={{ color: "var(--neon-cyan)" }}>{statusText}</span>
+          <div style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
+            System Status: <span style={{ color: "var(--text-primary)" }}>{statusText}</span>
           </div>
           {(startPoint || stopPoint) && (
             <button className="btn-hud btn-hud-danger" style={{ padding: "4px 10px", fontSize: "10px", width: "auto" }} onClick={() => { setStartPoint(null); setStopPoint(null); setRoutesMap({ driving: null, walking: null, cycling: null }); setNavigationActive(false); }}>
@@ -482,16 +506,16 @@ export default function App() {
       {/* 5. Floating Right Panel: Turn-by-Turn Guidance */}
       {navigationActive && selectedPathDetails && (
         <aside className="hud-overlay hud-right-panel hud-interactive">
-          <h2 className="panel-title" style={{ color: "var(--neon-emerald)", borderBottomColor: "var(--neon-emerald)" }}>
+          <h2 className="panel-title" style={{ color: "var(--accent-green)", borderBottomColor: "var(--accent-green)" }}>
             Nav Routing Guidance
-            <button className="btn-hud" style={{ padding: "2px 8px", fontSize: "10px", width: "auto" }} onClick={() => setNavigationActive(false)}>
+            <button className="btn-hud" style={{ padding: "4px 8px", fontSize: "11px", width: "auto" }} onClick={() => setNavigationActive(false)}>
               Close Panel
             </button>
           </h2>
           <div className="telemetry-row">
             <span className="telemetry-label">Route Choice</span>
-            <span className="telemetry-value" style={{ color: routePreference === "shortest_route" ? "var(--neon-cyan)" : "var(--neon-crimson)" }}>
-              {routePreference === "shortest_route" ? "SHORTEST PATH (BLUE)" : "MAIN ROAD PATH (RED)"}
+            <span className="telemetry-value" style={{ color: routePreference === "shortest_route" ? "var(--accent-blue)" : "var(--accent-red)" }}>
+              {routePreference === "shortest_route" ? "SHORTEST PATH" : "MAIN ROAD PATH"}
             </span>
           </div>
           <div className="telemetry-row" style={{ marginBottom: "12px" }}>
@@ -561,5 +585,6 @@ export default function App() {
 
       {error && <div className="hud-toast error">SYSTEM EXCEPTION :: {error}</div>}
     </div>
+    </>
   );
 }

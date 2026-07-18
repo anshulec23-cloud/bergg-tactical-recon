@@ -231,10 +231,73 @@ def get_route(source: str, destination: str, mode: str) -> dict[str, Any]:
     elif not shortest_route and main_route:
         shortest_route = main_route
 
+    # Extract threats (WiFi & CCTV) along the route
+    route_places = []
+    if main_route and "geometry" in main_route and "coordinates" in main_route["geometry"]:
+        coords = main_route["geometry"]["coordinates"]
+        if coords:
+            from app.services.wifi import get_wifi_heatmap
+            local_wifi = get_wifi_heatmap(hours=24*365)
+            
+            # Subsample coordinates to avoid massive loops (e.g. max 50 points)
+            step = max(1, len(coords) // 50)
+            sampled_coords = coords[::step]
+            
+            added_wifi = set()
+            for w in local_wifi:
+                for lon, lat in sampled_coords:
+                    if abs(w.lat - lat) < 0.005 and abs(w.lon - lon) < 0.005:
+                        if haversine_km(lat, lon, w.lat, w.lon) * 1000 <= 150:
+                            wid = f"{w.lat}-{w.lon}"
+                            if wid not in added_wifi:
+                                route_places.append({
+                                    "id": f"wifi-rt-{wid}",
+                                    "name": ",".join(w.ssids) if w.ssids else "Unknown Wi-Fi",
+                                    "category": "wifi",
+                                    "subcategory": "local_db",
+                                    "distance_m": 0,
+                                    "lat": w.lat,
+                                    "lon": w.lon,
+                                    "action_url": ""
+                                })
+                                added_wifi.add(wid)
+                            break
+            
+            # Inject mock CCTV cameras along the route
+            cctv_step = max(1, len(coords) // 5)
+            cctv_coords = coords[::cctv_step]
+            for i, (lon, lat) in enumerate(cctv_coords[:5]):
+                route_places.append({
+                    "id": f"cctv-rt-{i}",
+                    "name": f"Route CCTV-{i+1}",
+                    "category": "surveillance",
+                    "subcategory": "camera",
+                    "distance_m": 0,
+                    "lat": lat + 0.0001,
+                    "lon": lon + 0.0001,
+                    "action_url": ""
+                })
+                
+            # Fetch normal OSM amenities at the route midpoint
+            try:
+                from app.services.places import fetch_places
+                mid_idx = len(coords) // 2
+                mid_lon, mid_lat = coords[mid_idx]
+                dist_m = main_route.get("distance_m", 3000)
+                radius = min(5000, max(1500, int(dist_m / 2)))
+                osm_places = fetch_places(mid_lat, mid_lon, radius)
+                for p in osm_places:
+                    p_dict = p.dict()
+                    p_dict["distance_m"] = 0 # It's along the route
+                    route_places.append(p_dict)
+            except Exception as e:
+                print(f"Failed to fetch route OSM places: {e}")
+
     return {
         "source": {"label": src_label, "lat": src_lat, "lon": src_lon},
         "destination": {"label": dst_label, "lat": dst_lat, "lon": dst_lon},
         "main_route": main_route,
         "shortest_route": shortest_route,
+        "places": route_places,
         "traffic": estimate_route_traffic(profile, main_route["distance_m"], main_route["duration_s"], main_route["geometry"]),
     }
