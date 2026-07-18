@@ -138,7 +138,7 @@ To run the map interface completely offline without pining OpenStreetMap raster 
 2. **Move to project:**
    Place the downloaded `.pmtiles` file inside the `frontend/public/` directory (name it `map.pmtiles`).
 3. **Update MapPanel style:**
-   In `frontend/src/components/MapPanel.jsx`, replace the raster OSM source with a local vector PMTiles source:
+   In [MapPanel.jsx](file:///C:/Users/morbi/.gemini/antigravity/scratch/ares-recon-system/frontend/src/components/MapPanel.jsx#L100-L122), replace the raster OSM source with a local vector PMTiles source:
    ```javascript
    const map = new maplibregl.Map({
      container: containerRef.current,

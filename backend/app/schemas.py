@@ -59,3 +59,13 @@ class RoutePoint(BaseModel):
     lat: float
     lon: float
 
+class ChatContext(BaseModel):
+    lat: float
+    lon: float
+    mode: str
+    has_route: bool
+
+class ChatRequest(BaseModel):
+    message: str
+    context: ChatContext
+
